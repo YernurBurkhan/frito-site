@@ -23,7 +23,7 @@
        1) dataLayer объявляем ДО подключения GTM.
        2) frito_page_view пушим сразу при загрузке (попадёт в очередь GTM).
        3) gtag НЕ вставляем - GA4 настраивается внутри GTM.
-       ВАЖНО: замени GTM-XXXXXXX на свой ID контейнера (2 места: здесь и <noscript>). -->
+       ID контейнера GTM-NNCTRN5L уже подставлен (2 места: здесь и в <noscript>). -->
   <script>
     window.dataLayer = window.dataLayer || [];
     // событие просмотра страницы
@@ -34,7 +34,7 @@
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
+    })(window,document,'script','dataLayer','GTM-NNCTRN5L');</script>
   <!-- End Google Tag Manager -->
 
   <style>
@@ -236,6 +236,9 @@
     .order-footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 20px; justify-content: space-between; align-items: baseline; }
     .order-motto { font-size: 12px; color: rgba(169,159,214,.6); letter-spacing: .03em; }
     .order-mark { font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .2em; color: var(--ink-dim); }
+    /* статус ордена: ждём «кружочки» от Бауыржана (точка-кружок = телеграм-кружок) */
+    .order-status { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; color: var(--cyan); letter-spacing: .03em; text-shadow: var(--glow-c); }
+    .krug { flex: none; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--cyan); box-shadow: var(--glow-c); }
 
     /* =====================  АДАПТИВ  ===================== */
     @media (max-width: 860px) {
@@ -296,12 +299,16 @@
       /* кратковременный глитч лого по клику (пасхалка) */
       @keyframes logo-glitch { 0%{ filter: none } 25%{ filter: hue-rotate(80deg) saturate(1.4) } 50%{ transform: translate(3px,-2px) } 75%{ filter: hue-rotate(-60deg) } 100%{ filter: none } }
       .hero-logo.glitching img { animation: logo-glitch .35s steps(2,end) 2; }
+
+      /* кружочек «в ожидании» пульсирует (состояние: ждём контент) */
+      @keyframes krug-pulse { 0%,100%{ transform: scale(1); opacity: .55 } 50%{ transform: scale(1.4); opacity: 1 } }
+      .krug { animation: krug-pulse 1.6s ease-in-out infinite; }
     }
   </style>
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NNCTRN5L"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
 
@@ -380,6 +387,7 @@
   <footer class="order-footer">
     <div class="wrap">
       <span class="order-motto">Девиз ордена: «Спать или не спать, вот в чём вопрос»</span>
+      <span class="order-status"><span class="krug" aria-hidden="true"></span>Ждём все кружочки от Бауыржана</span>
       <span class="order-mark">FRITO ✌</span>
     </div>
   </footer>
