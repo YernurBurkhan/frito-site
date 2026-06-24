@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ============================================================
+       FRITO - пародийный микросайт «секретного ордена»
+       Один файл: HTML5 + нативный CSS + ванильный JS. Без сборки.
+       Бренд: тёмный неон-глитч (фиолет/циан) - задан ассетами.
+       Дизайн-диалы: VARIANCE 9 / MOTION 8 / DENSITY 3
+       ============================================================ -->
+
+  <title>FRITO · мкмкмк с 2020</title>
+  <meta name="description" content="Секретный орден пальцев ✌. Фейк-стартап FRITO. Айуан-сертифицировано." />
+
+  <!-- ВЕБ-ШРИФТ (прогрессивное улучшение, есть системный фолбэк) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet" />
+
+  <!-- =======================  АНАЛИТИКА  =======================
+       1) dataLayer объявляем ДО подключения GTM.
+       2) frito_page_view пушим сразу при загрузке (попадёт в очередь GTM).
+       3) gtag НЕ вставляем - GA4 настраивается внутри GTM.
+       ВАЖНО: замени GTM-XXXXXXX на свой ID контейнера (2 места: здесь и <noscript>). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    // событие просмотра страницы
+    window.dataLayer.push({ event: 'frito_page_view' });
+  </script>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
+  <!-- End Google Tag Manager -->
+
+  <style>
+    /* ===================  ТОКЕНЫ / БРЕНД  ===================
+       Один accent-locked бренд: фиолет (primary) + циан (бренд-вторичный).
+       Магента используется ТОЛЬКО для RGB-сдвига глитча (функция, не декор).
+       Радиусы: кнопки - pill (full), медиа - 18px, карточек нет (DENSITY 3). */
+    :root {
+      --bg:        #07050e;   /* near-black с фиолетовым подтоном (не чистый #000) */
+      --bg-2:      #0b0718;
+      --ink:       #ece8ff;   /* off-white (не чистый #fff) */
+      --ink-dim:   #a99fd6;
+      --violet:    #b66cff;
+      --cyan:      #5ad6ff;
+      --magenta:   #ff4dd2;   /* только глитч */
+      --ink-on-neon: #0a0612; /* тёмная типографика на ярком неоне (контраст AA) */
+
+      --font-display: 'Unbounded', 'Segoe UI', system-ui, sans-serif;
+      --font-ui: system-ui, 'Segoe UI', 'Segoe UI Variable', Roboto, sans-serif;
+
+      --maxw: 1400px;
+      --glow-v: 0 0 24px rgba(182,108,255,.55), 0 0 60px rgba(182,108,255,.25);
+      --glow-c: 0 0 24px rgba(90,214,255,.55), 0 0 60px rgba(90,214,255,.25);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; padding: 0; background: var(--bg); }
+
+    body {
+      color: var(--ink);
+      font-family: var(--font-ui);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      /* радиальное свечение в тон бренду, чтобы PNG/видео не «спорили» с фоном */
+      background:
+        radial-gradient(1100px 720px at 78% 18%, rgba(120,60,200,.20), transparent 60%),
+        radial-gradient(900px 700px at 12% 88%, rgba(40,150,200,.16), transparent 60%),
+        var(--bg);
+      background-attachment: fixed;
+    }
+
+    a { color: inherit; }
+
+    /* фиксированный CRT-оверлей: скан-линии + лёгкая зернистость.
+       pointer-events:none и fixed - не трогает скролл-перфоманс (skill 6.E). */
+    .crt {
+      position: fixed; inset: 0; z-index: 60; pointer-events: none;
+      mix-blend-mode: overlay; opacity: .5;
+      background-image: repeating-linear-gradient(
+        to bottom, rgba(255,255,255,.05) 0 1px, transparent 1px 3px);
+    }
+
+    .wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(20px, 5vw, 64px); }
+
+    /* ===================  СЕКЦИИ (ровно 2)  =================== */
+    .section { position: relative; min-height: 100dvh; display: flex; align-items: center; }
+
+    /* фоновые дрейфующие мем-слова (DENSITY 3 - редко, бледно) */
+    .drift-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .drift {
+      position: absolute; font-family: var(--font-ui); font-weight: 700;
+      color: rgba(182,108,255,.10); white-space: nowrap;
+      font-size: clamp(14px, 2.4vw, 30px); letter-spacing: .04em;
+      will-change: transform, opacity;
+    }
+
+    /* =====================  БЛОК 1 - HERO  =====================
+       Асимметрия (VARIANCE 9): лого крупно справа-сверху, текст внизу-слева,
+       большие пустые зоны. Ничего не центрируем по умолчанию. */
+    #hero { padding: clamp(72px, 9vh, 96px) 0 56px; }
+    .hero-grid {
+      position: relative; z-index: 1; width: 100%;
+      display: grid; gap: clamp(16px, 4vw, 48px);
+      grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+      grid-template-areas: "copy visual";
+      align-items: center;
+    }
+
+    .hero-copy { grid-area: copy; align-self: end; padding-bottom: clamp(8px, 6vh, 64px); }
+
+    /* заголовок hero (его же подменяет пасхалка по клику на лого) */
+    .hero-h {
+      font-family: var(--font-display); font-weight: 900;
+      font-size: clamp(28px, 4.6vw, 60px); line-height: 1.04; letter-spacing: -.01em;
+      color: var(--ink); max-width: 16ch;
+      margin: 0 0 clamp(20px, 3.4vh, 30px);
+      text-shadow: 0 0 26px rgba(182,108,255,.35);
+    }
+
+    .hero-sub {
+      max-width: 42ch; margin: 0 0 clamp(26px, 4vh, 40px);
+      font-size: clamp(15px, 1.6vw, 19px); line-height: 1.5; color: var(--ink);
+    }
+    .hero-sub b { color: var(--violet); font-weight: 700; }
+
+    /* лого: кроп водяного знака (clip-path) + screen-блендинг съедает чёрный постер */
+    .hero-visual { grid-area: visual; justify-self: end; }
+    .hero-logo {
+      position: relative; width: min(46vw, 460px); aspect-ratio: 664 / 922;
+      cursor: pointer; background: none; border: 0; padding: 0;
+      transform: translate3d(calc(var(--px, 0) * -16px), calc(var(--py, 0) * -16px), 0);
+      transition: transform .25s cubic-bezier(.16,1,.3,1);
+    }
+    .hero-logo img {
+      width: 100%; height: 100%; object-fit: contain; display: block;
+      mix-blend-mode: screen;                 /* чёрный постер сливается с фоном */
+      filter: drop-shadow(0 0 34px rgba(182,108,255,.45)) drop-shadow(0 0 70px rgba(90,214,255,.18));
+    }
+    /* слой глитча для лого (псевдо-дубликаты со сдвигом каналов) */
+    .hero-logo .glitch-pulse {
+      position: absolute; inset: 0; background-image: inherit; pointer-events: none;
+    }
+
+    /* =====================  БЛОК 2  =====================
+       Другая layout-семья: видео-фокус слева (крупно), текст-колонка справа со сдвигом. */
+    #ritual { padding: clamp(64px, 8vh, 96px) 0; }
+    .ritual-grid {
+      position: relative; z-index: 1; width: 100%;
+      display: grid; gap: clamp(24px, 5vw, 64px);
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      align-items: center;
+    }
+
+    .ritual-h {
+      font-family: var(--font-display); font-weight: 900;
+      font-size: clamp(34px, 6vw, 80px); line-height: .96; letter-spacing: -.01em;
+      margin: 0 0 clamp(18px, 3vh, 28px); color: var(--ink);
+      position: relative; max-width: 14ch;
+    }
+
+    .ritual-video-wrap { position: relative; justify-self: start; width: 100%; }
+    .ritual-video {
+      width: 100%; max-width: 520px; aspect-ratio: 1 / 1; display: block;
+      object-fit: cover; border-radius: 18px;
+      mix-blend-mode: screen;                 /* неоновая рука сливается с фоном в тон */
+      filter: drop-shadow(0 0 40px rgba(182,108,255,.40)) drop-shadow(0 0 80px rgba(90,214,255,.20));
+    }
+    /* неоновое кольцо-обводка в тон бренду (скругление 18px - shape lock для медиа) */
+    .ritual-video-wrap::after {
+      content: ""; position: absolute; inset: -2px; border-radius: 20px; pointer-events: none;
+      max-width: 524px;
+      border: 1px solid rgba(182,108,255,.45);
+      box-shadow: inset 0 0 30px rgba(90,214,255,.18), var(--glow-v);
+    }
+
+    .ritual-copy { align-self: center; }
+    .ritual-copy p {
+      font-size: clamp(15px, 1.5vw, 18px); line-height: 1.55; color: var(--ink); max-width: 42ch;
+      margin: 0 0 18px;
+    }
+    .ritual-copy .step { color: var(--cyan); font-weight: 700; }
+    .ritual-copy .glow-v { color: var(--violet); font-weight: 700; }
+
+    /* =====================  КНОПКИ (CTA)  =====================
+       Shape lock: pill (full-radius). Контраст AA проверен.
+       A - залитая неон-градиентом, тёмная типографика. B - неон-обводка, яркий циан. */
+    .cta {
+      position: relative; display: inline-flex; align-items: center; gap: .5em;
+      font-family: var(--font-ui); font-weight: 800; text-decoration: none;
+      padding: .85em 1.5em; border-radius: 999px; cursor: pointer;
+      font-size: clamp(15px, 1.6vw, 18px); letter-spacing: .01em;
+      transition: transform .12s ease, box-shadow .25s ease, filter .25s ease;
+      isolation: isolate;
+    }
+    .cta:active { transform: translateY(1px) scale(.985); }
+
+    .cta--a {
+      color: var(--ink-on-neon);
+      background: linear-gradient(100deg, var(--violet), var(--cyan));
+      box-shadow: var(--glow-v);
+    }
+    .cta--a:hover { box-shadow: 0 0 30px rgba(182,108,255,.7), 0 0 70px rgba(90,214,255,.4); }
+
+    .cta--b {
+      color: var(--cyan);
+      background: rgba(90,214,255,.06);
+      border: 1.5px solid rgba(90,214,255,.65);
+      box-shadow: var(--glow-c);
+    }
+    .cta--b:hover { background: rgba(90,214,255,.12); box-shadow: 0 0 30px rgba(90,214,255,.7); }
+
+    /* пасхалка: всплывашка «Айуан» над кнопкой при наведении */
+    .cta-spark {
+      position: absolute; left: 50%; top: -8px; translate: -50% -100%;
+      font-family: var(--font-display); font-weight: 700; font-size: 13px;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--magenta); text-shadow: 0 0 14px rgba(255,77,210,.8);
+      opacity: 0; pointer-events: none; transition: opacity .18s ease, translate .18s ease;
+      white-space: nowrap;
+    }
+    .cta:hover .cta-spark, .cta:focus-visible .cta-spark { opacity: 1; translate: -50% -120%; }
+
+    /* =====================  ФУТЕР (девиз ордена)  ===================== */
+    .order-footer {
+      position: relative; z-index: 1;
+      padding: 22px 0 30px; border-top: 1px solid rgba(182,108,255,.16);
+    }
+    .order-footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 20px; justify-content: space-between; align-items: baseline; }
+    .order-motto { font-size: 12px; color: rgba(169,159,214,.6); letter-spacing: .03em; }
+    .order-mark { font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .2em; color: var(--ink-dim); }
+
+    /* =====================  АДАПТИВ  ===================== */
+    @media (max-width: 860px) {
+      /* мобайл: строгая одна колонка (skill mobile override для VARIANCE 4-10) */
+      .hero-grid { grid-template-columns: 1fr; grid-template-areas: "visual" "copy"; gap: 12px; }
+      .hero-copy { align-self: start; padding-bottom: 0; }
+      .hero-visual { justify-self: center; }
+      .hero-logo { width: min(76vw, 360px); }
+      .ritual-grid { grid-template-columns: 1fr; }
+      .ritual-video-wrap { justify-self: center; }
+      .ritual-video, .ritual-video-wrap::after { max-width: 440px; margin: 0 auto; }
+      .section { min-height: auto; padding-top: 64px; padding-bottom: 64px; }
+      #hero { min-height: 100dvh; }
+    }
+
+    /* =====================  АНИМАЦИИ (только если разрешено)  =====================
+       Всё кинетическое живёт внутри no-preference. Под reduced-motion - статика. */
+    @media (prefers-reduced-motion: no-preference) {
+      /* дрейф мем-слов */
+      @keyframes drift-a { 0%{ transform: translate(0,0); opacity:0 } 12%{opacity:.10} 88%{opacity:.10} 100%{ transform: translate(40px,-60px); opacity:0 } }
+      @keyframes drift-b { 0%{ transform: translate(0,0); opacity:0 } 12%{opacity:.08} 88%{opacity:.08} 100%{ transform: translate(-50px,40px); opacity:0 } }
+      .drift { animation: drift-a linear infinite; }
+      .drift:nth-child(even) { animation-name: drift-b; }
+
+      /* появление контента блока 2 при входе во вьюпорт */
+      .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+      .reveal.in { opacity: 1; transform: none; }
+
+      /* мягкое неоновое «дыхание» видео-кольца */
+      @keyframes ring-breathe { 0%,100%{ box-shadow: inset 0 0 30px rgba(90,214,255,.18), 0 0 24px rgba(182,108,255,.5), 0 0 60px rgba(182,108,255,.22) } 50%{ box-shadow: inset 0 0 40px rgba(90,214,255,.28), 0 0 34px rgba(182,108,255,.7), 0 0 80px rgba(182,108,255,.35) } }
+      .ritual-video-wrap::after { animation: ring-breathe 4.5s ease-in-out infinite; }
+
+      /* глитч заголовка блока 2: RGB-сдвиг через псевдоэлементы */
+      .glitch { position: relative; }
+      .glitch::before, .glitch::after {
+        content: attr(data-text); position: absolute; inset: 0; pointer-events: none;
+        clip-path: inset(0 0 0 0);
+      }
+      .glitch::before { color: var(--cyan); transform: translate(2px,0); mix-blend-mode: screen; animation: g-top 3.2s steps(2,end) infinite; }
+      .glitch::after  { color: var(--magenta); transform: translate(-2px,0); mix-blend-mode: screen; animation: g-bot 2.7s steps(2,end) infinite; }
+      @keyframes g-top {
+        0%,92%,100%{ clip-path: inset(0 0 100% 0); transform: translate(0,0) }
+        93%{ clip-path: inset(0 0 62% 0); transform: translate(3px,-1px) }
+        96%{ clip-path: inset(40% 0 30% 0); transform: translate(-3px,1px) }
+        99%{ clip-path: inset(10% 0 70% 0); transform: translate(2px,0) }
+      }
+      @keyframes g-bot {
+        0%,90%,100%{ clip-path: inset(100% 0 0 0); transform: translate(0,0) }
+        91%{ clip-path: inset(58% 0 0 0); transform: translate(-3px,1px) }
+        95%{ clip-path: inset(70% 0 8% 0); transform: translate(3px,-1px) }
+        98%{ clip-path: inset(80% 0 0 0); transform: translate(-2px,0) }
+      }
+
+      /* кнопка: микро-вздрог при наведении (пасхалка) */
+      @keyframes jolt { 0%,100%{ transform: translate(0,0) } 20%{ transform: translate(-1.5px,1px) rotate(-.4deg) } 40%{ transform: translate(1.5px,-1px) rotate(.4deg) } 60%{ transform: translate(-1px,0) } 80%{ transform: translate(1px,1px) } }
+      .cta:hover { animation: jolt .28s linear; }
+
+      /* кратковременный глитч лого по клику (пасхалка) */
+      @keyframes logo-glitch { 0%{ filter: none } 25%{ filter: hue-rotate(80deg) saturate(1.4) } 50%{ transform: translate(3px,-2px) } 75%{ filter: hue-rotate(-60deg) } 100%{ filter: none } }
+      .hero-logo.glitching img { animation: logo-glitch .35s steps(2,end) 2; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <div class="crt" aria-hidden="true"></div>
+
+  <main>
+    <!-- =====================  БЛОК 1 - HERO  ===================== -->
+    <section id="hero" class="section">
+      <div class="drift-layer" data-drift aria-hidden="true"></div>
+      <div class="wrap">
+        <div class="hero-grid">
+
+          <div class="hero-copy">
+            <h1 class="hero-h" id="slogan" title="кликни по лого ✌">Осторожно: зона повышенного локального юмора!</h1>
+            <p class="hero-sub">
+              Если вы не понимаете, о чём речь, значит, вам сюда нельзя.
+              Если понимаете - добро пожаловать домой, <b>айуан</b>!
+            </p>
+            <a class="cta cta--a"
+               data-track="A"
+               href="https://www.instagram.com/reel/Cg6Iu6vFheb/"
+               target="_blank" rel="noopener">
+              мкмкмк
+              <span class="cta-spark" aria-hidden="true">Айуан</span>
+            </a>
+          </div>
+
+          <div class="hero-visual">
+            <button class="hero-logo" id="fritoLogo" type="button" aria-label="Лого FRITO. Клик меняет слоган.">
+              <img src="assets/frito-logo.png" alt="Неоновое лого FRITO: рука ✌ и надпись. мкмкмк." />
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================  БЛОК 2 - РИТУАЛ  ===================== -->
+    <section id="ritual" class="section">
+      <div class="drift-layer" data-drift aria-hidden="true"></div>
+      <div class="wrap">
+        <div class="ritual-grid">
+
+          <div class="ritual-video-wrap reveal">
+            <video class="ritual-video" autoplay muted loop playsinline
+                   aria-label="Неоновая рука FRITO: пальцы сходятся и расходятся.">
+              <source src="assets/frito-hand.mp4" type="video/mp4" />
+            </video>
+          </div>
+
+          <div class="ritual-copy reveal">
+            <h2 class="ritual-h glitch" data-text="Освой священное движение">Освой священное движение</h2>
+            <p>
+              Сложи пальцы в <span class="glow-v">✌</span>. Прошепчи <span class="step">«МааМаа»</span>.
+              Если рука засветилась неоном - ритуал принят: теперь ты официально
+              разбираешься в <span class="glow-v">Шөпаағ</span>.
+            </p>
+            <p>
+              Если не засветилась - не страшно: делаешь вдох и повторяешь,
+              пока не услышишь внутри <span class="step">«мкмкмк»</span>.
+            </p>
+            <a class="cta cta--b"
+               data-track="B"
+               href="https://youtu.be/xqV1duHmgSA"
+               target="_blank" rel="noopener">
+              мкмкмк
+              <span class="cta-spark" aria-hidden="true">Айуан</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="order-footer">
+    <div class="wrap">
+      <span class="order-motto">Девиз ордена: «Спать или не спать, вот в чём вопрос»</span>
+      <span class="order-mark">FRITO ✌</span>
+    </div>
+  </footer>
+
+  <script>
+    'use strict';
+
+    /* ----- учитываем prefers-reduced-motion ----- */
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ----- мем-словари ----- */
+    // пул для пасхалки-слогана (клик по лого)
+    var MEMES = [
+      'мкмкмк', 'МааМаа', 'Айуан', 'Шөпаағ',
+      'Спать или не спать, вот в чём вопрос'
+    ];
+    // слова для фонового дрейфа
+    var DRIFT_WORDS = ['мкмкмк', 'МааМаа', 'Айуан', 'Шөпаағ'];
+
+    /* ============================================================
+       1) ФОНОВЫЙ ДРЕЙФ МЕМ-СЛОВ (DENSITY 3 - редко и бледно)
+       ============================================================ */
+    if (!prefersReduced) {
+      document.querySelectorAll('[data-drift]').forEach(function (layer) {
+        var count = 5; // намеренно мало - воздушно
+        for (var i = 0; i < count; i++) {
+          var s = document.createElement('span');
+          s.className = 'drift';
+          s.textContent = DRIFT_WORDS[Math.floor(Math.random() * DRIFT_WORDS.length)];
+          s.style.left = (Math.random() * 82 + 4) + '%';
+          s.style.top = (Math.random() * 78 + 8) + '%';
+          var dur = 16 + Math.random() * 16;
+          s.style.animationDuration = dur.toFixed(1) + 's';
+          s.style.animationDelay = (-Math.random() * dur).toFixed(1) + 's';
+          layer.appendChild(s);
+        }
+      });
+    }
+
+    /* ============================================================
+       2) ПАРАЛЛАКС ЛОГО ПО КУРСОРУ (через CSS-переменные + rAF,
+          без state-петель; отключается под reduced-motion)
+       ============================================================ */
+    (function () {
+      if (prefersReduced) return;
+      var hero = document.getElementById('hero');
+      var logo = document.getElementById('fritoLogo');
+      if (!hero || !logo) return;
+      var tx = 0, ty = 0, raf = null;
+      hero.addEventListener('pointermove', function (e) {
+        var r = hero.getBoundingClientRect();
+        tx = (e.clientX - r.left) / r.width - 0.5;
+        ty = (e.clientY - r.top) / r.height - 0.5;
+        if (!raf) raf = requestAnimationFrame(apply);
+      });
+      hero.addEventListener('pointerleave', function () { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(apply); });
+      function apply() { raf = null; logo.style.setProperty('--px', tx.toFixed(3)); logo.style.setProperty('--py', ty.toFixed(3)); }
+    })();
+
+    /* ============================================================
+       3) ПАСХАЛКА: клик по лого FRITO -> случайный мем в слоган
+       ============================================================ */
+    (function () {
+      var logo = document.getElementById('fritoLogo');
+      var slogan = document.getElementById('slogan');
+      if (!logo || !slogan) return;
+      logo.addEventListener('click', function () {
+        var pick;
+        do { pick = MEMES[Math.floor(Math.random() * MEMES.length)]; }
+        while ((pick + ' ✌') === slogan.textContent && MEMES.length > 1);
+        slogan.textContent = pick + ' ✌';
+        if (!prefersReduced) {
+          logo.classList.remove('glitching');
+          void logo.offsetWidth;        // рестарт анимации
+          logo.classList.add('glitching');
+        }
+      });
+    })();
+
+    /* ============================================================
+       4) SCROLL-REVEAL блока 2 (IntersectionObserver, без scroll-листенеров)
+       ============================================================ */
+    (function () {
+      var items = document.querySelectorAll('.reveal');
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        items.forEach(function (el) { el.classList.add('in'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.25 });
+      items.forEach(function (el) { io.observe(el); });
+    })();
+
+    /* ============================================================
+       5) ПАСХАЛКА: при уходе со вкладки title становится девизом ордена
+       ============================================================ */
+    (function () {
+      var original = document.title;
+      document.addEventListener('visibilitychange', function () {
+        document.title = document.hidden
+          ? 'Спать или не спать, вот в чём вопрос'
+          : original;
+      });
+    })();
+
+    /* ============================================================
+       6) АНАЛИТИКА: пуш frito_click в dataLayer ДО перехода по ссылке.
+          Ссылки открываются в новой вкладке (target=_blank), поэтому
+          событие успевает уйти. preventDefault не используем.
+       ============================================================ */
+    document.querySelectorAll('.cta[data-track]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        // у обеих кнопок видимый текст «мкмкмк»; различаем их по button_id
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'frito_click',
+          button_id: btn.getAttribute('data-track'),   // 'A' или 'B'
+          button_text: 'мкмкмк',
+          link_url: btn.getAttribute('href')
+        });
+      });
+    });
+  </script>
+</body>
+</html>
